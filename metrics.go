@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mindprince/gonvml"
@@ -95,6 +96,9 @@ func collectMetrics() (*Metrics, error) {
 		if fanSpeedValid {
 			fanSpeed, err = device.FanSpeed()
 			if err != nil {
+				if !strings.Contains(err.Error(), "Not Supported") {
+					return nil, err
+				}
 				log.Printf(`metrics.fanSpeed: failed to get device fan speed. [ERR]: "%s"`, err.Error())
 				fanSpeedValid = false
 			}
