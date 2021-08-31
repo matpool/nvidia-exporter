@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mindprince/gonvml"
@@ -52,6 +54,7 @@ func collectMetrics() (*Metrics, error) {
 		return nil, err
 	}
 
+	fanSpeedValid := true
 	for index := 0; index < int(numDevices); index++ {
 		device, err := gonvml.DeviceHandleByIndex(uint(index))
 		if err != nil {
@@ -88,9 +91,17 @@ func collectMetrics() (*Metrics, error) {
 			return nil, err
 		}
 
-		fanSpeed, err := device.FanSpeed()
-		if err != nil {
-			return nil, err
+		// some device does not have a fan. e.g. `Tesla T4` `Tesla P100-SXM2`
+		var fanSpeed uint
+		if fanSpeedValid {
+			fanSpeed, err = device.FanSpeed()
+			if err != nil {
+				if !strings.Contains(err.Error(), "Not Supported") {
+					return nil, err
+				}
+				log.Printf(`metrics.fanSpeed: failed to get device fan speed. [ERR]: "%s"`, err.Error())
+				fanSpeedValid = false
+			}
 		}
 
 		memoryTotal, memoryUsed, err := device.MemoryInfo()
