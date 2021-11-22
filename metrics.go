@@ -71,11 +71,6 @@ func collectMetrics() (*Metrics, error) {
 			return nil, err
 		}
 
-		minorNumber, err := device.MinorNumber()
-		if err != nil {
-			return nil, err
-		}
-
 		temperature, err := device.Temperature()
 		if err != nil {
 			return nil, err
@@ -122,7 +117,7 @@ func collectMetrics() (*Metrics, error) {
 		metrics.Devices = append(metrics.Devices,
 			&Device{
 				Index:                 strconv.Itoa(index),
-				MinorNumber:           strconv.Itoa(int(minorNumber)),
+				MinorNumber:           strconv.Itoa(index),
 				Name:                  name,
 				UUID:                  uuid,
 				Temperature:           float64(temperature),
